@@ -1,8 +1,6 @@
 use std::{ops, fmt};
 
-#[derive(Debug)]
-#[derive(Clone)]
-#[derive(Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
   e: [f64; 3]
 }
