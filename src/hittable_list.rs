@@ -5,14 +5,7 @@ pub struct HittableList {
 }
 
 impl HittableList {
-  pub fn empty() -> Self { HittableList { objects: Vec::new() } }
-  pub fn new(object: Box<dyn Hittable>) -> Self {
-    let mut h = Self::empty();
-    h.add(object);
-    h
-  }
-
-  pub fn clear(&mut self) { self.objects.clear() }
+  pub fn new() -> Self { HittableList { objects: Vec::new() } }
   pub fn add(&mut self, object: Box<dyn Hittable>) { self.objects.push(object) }
 }
 

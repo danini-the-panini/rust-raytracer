@@ -23,13 +23,10 @@ impl Hittable for Sphere {
       if root < t_min || t_max < root { return None }
     }
 
-    let t = root;
-    let p = r.at(t);
-    let outward_normal = (p - self.center) / self.radius;
+    let mut rec = HitRecord::new(root, &r.at(root));
+    let outward_normal = (rec.p - self.center) / self.radius;
+    rec.set_face_normal(r, &outward_normal);
 
-    let mut record = HitRecord { t, p, normal: outward_normal, front_face: false };
-    record.set_face_normal(r, &outward_normal);
-
-    Some(record)
+    Some(rec)
   }
 }

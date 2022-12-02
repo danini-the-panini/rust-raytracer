@@ -1,5 +1,7 @@
 use std::{ops, fmt};
 
+use crate::util::{random_double, random_double_in_range};
+
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
   e: [f64; 3]
@@ -11,6 +13,19 @@ pub type Color = Vec3;
 impl Vec3 {
   pub fn zero() -> Self { Vec3 { e: [0.0, 0.0, 0.0] } }
   pub fn new(e0: f64, e1: f64, e2: f64) -> Self { Vec3 { e: [e0, e1, e2] } }
+
+  pub fn random() -> Self {
+    Vec3 { e: [random_double(), random_double(), random_double()] }
+  }
+  pub fn random_in_range(min: f64, max: f64) -> Self {
+    Vec3 { e: [random_double_in_range(min, max), random_double_in_range(min, max), random_double_in_range(min, max)] }
+  }
+  pub fn random_in_unit_sphere() -> Vec3 {
+    loop {
+      let p = Vec3::random_in_range(-1.0, 1.0);
+      if p.length_squared() < 1.0 { break p };
+    }
+  }
   
   pub fn x(&self) -> f64 { self.e[0] }
   pub fn y(&self) -> f64 { self.e[1] }

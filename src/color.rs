@@ -12,8 +12,8 @@ pub fn write_color(pixel_color: Color, samples_per_pixel: i32) {
   b *= scale;
 
   println!("{} {} {}",
-    (256.0 * r.clamp(0.0, 0.999)) as u16,
-    (256.0 * g.clamp(0.0, 0.999)) as u16,
-    (256.0 * b.clamp(0.0, 0.999)) as u16
+    (256.0 * r.clamp(0.0, 0.999)) as i32,
+    (256.0 * g.clamp(0.0, 0.999)) as i32,
+    (256.0 * b.clamp(0.0, 0.999)) as i32
   );
 }
