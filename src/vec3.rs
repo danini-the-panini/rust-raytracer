@@ -20,11 +20,14 @@ impl Vec3 {
   pub fn random_in_range(min: f64, max: f64) -> Self {
     Vec3 { e: [random_double_in_range(min, max), random_double_in_range(min, max), random_double_in_range(min, max)] }
   }
-  pub fn random_in_unit_sphere() -> Vec3 {
+  pub fn random_in_unit_sphere() -> Self {
     loop {
       let p = Vec3::random_in_range(-1.0, 1.0);
       if p.length_squared() < 1.0 { break p };
     }
+  }
+  pub fn random_unit_vector() -> Self {
+    unit_vector(Vec3::random_in_unit_sphere())
   }
   
   pub fn x(&self) -> f64 { self.e[0] }
