@@ -29,6 +29,12 @@ impl Vec3 {
   pub fn random_unit_vector() -> Self {
     unit_vector(Vec3::random_in_unit_sphere())
   }
+  pub fn random_in_unit_disk() -> Self {
+    loop {
+      let p = Vec3::new(random_double_in_range(-1.0, 1.0), random_double_in_range(-1.0, 1.0), 0.0);
+      if p.length_squared() < 1.0 { break p };
+    }
+  }
   
   pub fn x(&self) -> f64 { self.e[0] }
   pub fn y(&self) -> f64 { self.e[1] }
