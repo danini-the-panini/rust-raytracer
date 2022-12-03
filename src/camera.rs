@@ -1,4 +1,4 @@
-use crate::{vec3::{Point3, Vec3, unit_vector, cross}, ray::Ray};
+use crate::{vec3::{Point3, Vec3, unit_vector, cross}, ray::Ray, util::random_double_in_range};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Camera {
@@ -7,7 +7,9 @@ pub struct Camera {
   horizontal: Vec3,
   vertical: Vec3,
   u: Vec3, v: Vec3, w: Vec3,
-  lens_radius: f64
+  lens_radius: f64,
+  time0: f64,
+  time1: f64
 }
 
 impl Camera {
@@ -18,9 +20,11 @@ impl Camera {
     vfov: f64,
     aspect_ratio: f64,
     aperture: f64,
-    focus_dist: f64
+    focus_dist: f64,
+    time0: f64,
+    time1: f64
   ) -> Self {
-    let theta = vfov.to_radians(); 
+    let theta = vfov.to_radians();
     let h = f64::tan(theta/2.0);
     let viewport_height = 2.0 * h;
     let viewport_width = aspect_ratio * viewport_height;
@@ -38,7 +42,8 @@ impl Camera {
       vertical,
       lower_left_corner: lookfrom - horizontal/2.0 - vertical/2.0 - focus_dist*w,
       u, v, w,
-      lens_radius: aperture / 2.0
+      lens_radius: aperture / 2.0,
+      time0, time1
     }
   }
 
@@ -48,7 +53,8 @@ impl Camera {
 
     Ray::new(
       self.origin + offset,
-      self.lower_left_corner + s*self.horizontal + t*self.vertical - self.origin - offset
+      self.lower_left_corner + s*self.horizontal + t*self.vertical - self.origin - offset,
+      random_double_in_range(self.time0, self.time1)
     )
   }
 }

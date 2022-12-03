@@ -4,12 +4,14 @@ mod color;
 mod ray;
 mod hittable;
 mod sphere;
+mod moving_sphere;
 mod hittable_list;
 mod camera;
 mod material;
 
 use std::f64::INFINITY;
 use indicatif::ProgressBar;
+use moving_sphere::MovingSphere;
 use rayon::prelude::IntoParallelIterator;
 use rayon::iter::ParallelIterator;
 
@@ -73,7 +75,8 @@ fn random_scene() -> HittableList {
           // diffuse
           let albedo = Color::random() * Color::random();
           let material = Lambertian { albedo };
-          world.add(Box::new(Sphere { center, radius: 0.2, material }));
+          let center1 = center + Vec3::new(0.0, random_double_in_range(0.0, 0.5), 0.0);
+          world.add(Box::new(MovingSphere { center0: center, center1, time0: 0.0, time1: 1.0, radius: 0.2, material }));
         } else if choose_mat < 0.95 {
           // metal
           let albedo = Color::random_in_range(0.5, 1.0);
@@ -104,10 +107,10 @@ fn random_scene() -> HittableList {
 fn main() {
   // Image
 
-  let aspect_ratio = 3.0 / 2.0;
-  let image_width = 1200;
+  let aspect_ratio = 16.0 / 9.0;
+  let image_width = 400;
   let image_height = (image_width as f64 / aspect_ratio) as i32;
-  let samples_per_pixel = 500;
+  let samples_per_pixel = 100;
   let max_depth = 50;
 
   // World
@@ -120,8 +123,8 @@ fn main() {
   let vup = Vec3::new(0.0,1.0,0.0);
   let dist_to_focus = 10.0;
   let aperture = 0.1;
-  
-  let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
+
+  let cam = Camera::new(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus, 0.0, 1.0);
 
   //Render
 

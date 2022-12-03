@@ -11,7 +11,7 @@ pub struct Lambertian {
 }
 
 impl Material for Lambertian {
-  fn scatter(&self, _r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+  fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
       let mut scatter_direction = rec.normal + Vec3::random_unit_vector();
 
       // Catch degenerate scatter direction
@@ -19,7 +19,7 @@ impl Material for Lambertian {
         scatter_direction = rec.normal;
       }
 
-      Some((self.albedo, Ray::new(rec.p, scatter_direction)))
+      Some((self.albedo, Ray::new(rec.p, scatter_direction, r_in.time())))
   }
 }
 
@@ -32,7 +32,7 @@ pub struct Metal {
 impl Material for Metal {
   fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
       let reflected = reflect(&unit_vector(r_in.direction()), &rec.normal);
-      let scattered = Ray::new(rec.p, reflected + self.fuzz*Vec3::random_in_unit_sphere());
+      let scattered = Ray::new(rec.p, reflected + self.fuzz*Vec3::random_in_unit_sphere(), r_in.time());
 
       if dot(&scattered.direction(), &rec.normal) > 0.0 {
         Some((self.albedo, scattered))
@@ -73,7 +73,7 @@ impl Material for Dialectric {
 
     Some((
       Color::new(1.0, 1.0, 1.0),
-      Ray::new(rec.p, direction)
+      Ray::new(rec.p, direction, r_in.time())
     ))
   }
 }
