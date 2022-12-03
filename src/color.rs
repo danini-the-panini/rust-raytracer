@@ -1,15 +1,9 @@
 use crate::{vec3::Color};
 
-pub fn write_color(pixel_color: Color, samples_per_pixel: i32) {
-  let mut r = pixel_color.x();
-  let mut g = pixel_color.y();
-  let mut b = pixel_color.z();
-
-  // Divide the color by the number of samples.
-  let scale = 1.0 / samples_per_pixel as f64;
-  r = (r * scale).sqrt();
-  g = (g * scale).sqrt();
-  b = (b * scale).sqrt();
+pub fn write_color(pixel_color: Color) {
+  let r = pixel_color.x().sqrt();
+  let g = pixel_color.y().sqrt();
+  let b = pixel_color.z().sqrt();
 
   println!("{} {} {}",
     (256.0 * r.clamp(0.0, 0.999)) as i32,
