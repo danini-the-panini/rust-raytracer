@@ -58,6 +58,7 @@ fn main() {
   world.add(Box::new(Sphere { center: Point3::new(0.0,-100.5,-1.0), radius: 100.0, material: Rc::new(material_ground) }));
   world.add(Box::new(Sphere { center: Point3::new( 0.0, 0.0, -1.0), radius: 0.5, material: Rc::new(material_center) }));
   world.add(Box::new(Sphere { center: Point3::new(-1.0, 0.0, -1.0), radius: 0.5, material: Rc::new(material_left) }));
+  world.add(Box::new(Sphere { center: Point3::new(-1.0, 0.0, -1.0), radius: -0.4, material: Rc::new(material_left) }));
   world.add(Box::new(Sphere { center: Point3::new( 1.0, 0.0, -1.0), radius: 0.5, material: Rc::new(material_right) }));
 
 
