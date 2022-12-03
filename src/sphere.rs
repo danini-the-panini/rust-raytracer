@@ -1,14 +1,12 @@
-use std::rc::Rc;
-
 use crate::{vec3::{Point3, dot}, hittable::{Hittable, HitRecord}, ray::Ray, material::Material};
 
-pub struct Sphere {
+pub struct Sphere<M: Material> {
   pub center: Point3,
   pub radius: f64,
-  pub material: Rc<dyn Material>,
+  pub material: M,
 }
 
-impl Hittable for Sphere {
+impl<M: Material> Hittable for Sphere<M> {
   fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
     let oc = r.origin() - self.center;
     let a = r.direction().length_squared();
@@ -29,7 +27,7 @@ impl Hittable for Sphere {
     let t = root;
     let p = r.at(t);
     let outward_normal = (p - self.center) / self.radius;
-    let mut rec = HitRecord { t, p, material: Rc::clone(&self.material), normal: outward_normal, front_face: true };
+    let mut rec = HitRecord { t, p, material: &self.material, normal: outward_normal, front_face: true };
     rec.set_face_normal(r, &outward_normal);
 
     Some(rec)

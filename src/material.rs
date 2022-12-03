@@ -1,7 +1,7 @@
 use std::f64;
 use crate::{ray::Ray, hittable::HitRecord, vec3::{Color, Vec3, reflect, unit_vector, dot, refract}, util::random_double};
 
-pub trait Material {
+pub trait Material: Sync {
   fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
 }
 
