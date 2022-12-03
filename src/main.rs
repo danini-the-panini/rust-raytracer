@@ -17,7 +17,7 @@ use crate::hittable_list::HittableList;
 use crate::material::{Lambertian, Metal, Dialectric};
 use crate::sphere::Sphere;
 use crate::util::random_double;
-use crate::vec3::{Point3, Color, unit_vector};
+use crate::vec3::{Point3, Color, unit_vector, Vec3};
 use crate::color::write_color;
 use crate::ray::Ray;
 
@@ -58,12 +58,18 @@ fn main() {
   world.add(Box::new(Sphere { center: Point3::new(0.0,-100.5,-1.0), radius: 100.0, material: Rc::new(material_ground) }));
   world.add(Box::new(Sphere { center: Point3::new( 0.0, 0.0, -1.0), radius: 0.5, material: Rc::new(material_center) }));
   world.add(Box::new(Sphere { center: Point3::new(-1.0, 0.0, -1.0), radius: 0.5, material: Rc::new(material_left) }));
-  world.add(Box::new(Sphere { center: Point3::new(-1.0, 0.0, -1.0), radius: -0.4, material: Rc::new(material_left) }));
+  world.add(Box::new(Sphere { center: Point3::new(-1.0, 0.0, -1.0), radius: -0.45, material: Rc::new(material_left) }));
   world.add(Box::new(Sphere { center: Point3::new( 1.0, 0.0, -1.0), radius: 0.5, material: Rc::new(material_right) }));
 
 
   // Camera
-  let cam = Camera::new(120.0, 16.0/9.0);
+  let cam = Camera::new(
+    Point3::new(-2.0,2.0,1.0),
+    Point3::new(0.0,0.0,-1.0),
+    Vec3::new(0.0,1.0,0.0),
+    20.0,
+    16.0/9.0
+  );
 
   //Render
 
