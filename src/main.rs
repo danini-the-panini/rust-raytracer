@@ -63,7 +63,7 @@ fn main() {
 
 
   // Camera
-  let cam = Camera::new();
+  let cam = Camera::new(120.0, 16.0/9.0);
 
   //Render
 
