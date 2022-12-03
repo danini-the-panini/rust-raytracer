@@ -1,4 +1,4 @@
-use crate::{ray::Ray, hittable::HitRecord, vec3::{Color, Vec3, reflect, unit_vector, dot}};
+use crate::{ray::Ray, hittable::HitRecord, vec3::{Color, Vec3, reflect, unit_vector, dot, refract}};
 
 pub trait Material {
   fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
@@ -38,5 +38,34 @@ impl Material for Metal {
       } else {
         None
       }
+  }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Dialectric {
+  pub ir: f64
+}
+
+impl Material for Dialectric {
+  fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+    let refraction_ratio = if rec.front_face { 1.0/self.ir } else { self.ir };
+
+    let unit_direction = unit_vector(r_in.direction());
+    let a = dot(&-unit_direction, &rec.normal);
+    let cos_theta = if a < 1.0 { a } else { 1.0 };
+    let sin_theta = (1.0 - cos_theta*cos_theta).sqrt();
+
+    let cannot_refract = refraction_ratio * sin_theta > 1.0;
+
+    let direction = if cannot_refract {
+      reflect(&unit_direction, &rec.normal)
+    } else {
+      refract(&unit_direction, &rec.normal, refraction_ratio)
+    };
+
+    Some((
+      Color::new(1.0, 1.0, 1.0),
+      Ray::new(rec.p, direction)
+    ))
   }
 }
