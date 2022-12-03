@@ -41,6 +41,12 @@ impl Vec3 {
   pub fn length_squared(&self) -> f64 {
     self.e[0] * self.e[0] + self.e[1] * self.e[1] + self.e[2] * self.e[2]
   }
+
+  pub fn near_zero(&self) -> bool {
+    // Return true if the vector is close to zero in all dimensions.
+    let s = 1e-8;
+    self.e[0].abs() < s && self.e[1].abs() < s && self.e[2].abs() < s
+  }
 }
 
 impl ops::Neg for Vec3 {
@@ -151,4 +157,8 @@ pub fn cross(u: &Vec3, v: &Vec3) -> Vec3 {
 
 pub fn unit_vector(v: Vec3) -> Vec3 {
   v / v.length()
+}
+
+pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+  *v - 2.0*dot(v, n)*(*n)
 }
