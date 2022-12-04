@@ -66,8 +66,8 @@ pub struct RotateY<H: Hittable> {
 impl<H: Hittable> RotateY<H> {
   pub fn new(hittable: H, angle: f64) -> Self {
     let radians = angle.to_radians();
-    let sin_theta = f64::sin(radians);
-    let cos_theta = f64::cos(radians);
+    let sin_theta = (radians).sin();
+    let cos_theta = (radians).cos();
     if let Some(bbox) = hittable.bounding_box(0.0, 1.0) {
 
       let mut min = Point3::new(INFINITY, INFINITY, INFINITY);

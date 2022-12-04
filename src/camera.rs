@@ -25,7 +25,7 @@ impl Camera {
     time1: f64
   ) -> Self {
     let theta = vfov.to_radians();
-    let h = f64::tan(theta/2.0);
+    let h = (theta/2.0).tan();
     let viewport_height = 2.0 * h;
     let viewport_width = aspect_ratio * viewport_height;
 

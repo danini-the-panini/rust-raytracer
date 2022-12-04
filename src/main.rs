@@ -14,10 +14,12 @@ mod texture;
 mod perlin;
 mod aarect;
 mod cube;
+mod constant_medium;
 
 use std::f64::INFINITY;
 use aarect::{XYRect, YZRect, XZRect};
 use bvh::BVH;
+use constant_medium::ConstantMedium;
 use cube::Cube;
 use hittable::{RotateY, Translate};
 use indicatif::ProgressBar;
@@ -189,6 +191,35 @@ fn cornell_box() -> BVH {
   BVH::new(objects, 0.0, 0.0)
 }
 
+fn cornell_smoke() -> BVH {
+  let mut objects: Vec<Box<dyn Hittable>> = Vec::new();
+
+  let red = Lambertian::solid(Color::new(0.65, 0.05, 0.05));
+  let white = Lambertian::solid(Color::new(0.73, 0.73, 0.73));
+  let green = Lambertian::solid(Color::new(0.12, 0.45, 0.15));
+  let light = DiffuseLight::solid(Color::new(7.0,7.0,7.0));
+
+  objects.push(Box::new(YZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, green)));
+  objects.push(Box::new(YZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, red)));
+  objects.push(Box::new(XZRect::new(113.0, 443.0, 127.0, 432.0, 554.0, light)));
+  objects.push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, white)));
+  objects.push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
+  objects.push(Box::new(XYRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
+
+  let cube1 = Cube::new(Point3::new(0.0, 0.0, 0.0), Point3::new(165.0, 330.0, 165.0), white);
+  let cube1 = RotateY::new(cube1, 15.0);
+  let cube1 = Translate::new(cube1, Vec3::new(265.0, 0.0, 295.0));
+
+  let cube2 = Cube::new(Point3::new(0.0, 0.0, 0.0), Point3::new(165.0, 165.0, 165.0), white);
+  let cube2 = RotateY::new(cube2, -18.0);
+  let cube2 = Translate::new(cube2, Vec3::new(130.0, 0.0, 65.0));
+
+  objects.push(Box::new(ConstantMedium::solid(cube1, 0.01, Color::new(0.0, 0.0, 0.0))));
+  objects.push(Box::new(ConstantMedium::solid(cube2, 0.01, Color::new(1.0, 1.0, 1.0))));
+
+  BVH::new(objects, 0.0, 0.0)
+}
+
 fn main() {
   // Image
 
@@ -201,7 +232,7 @@ fn main() {
 
   // World
 
-  let world = cornell_box();
+  let world = cornell_smoke();
 
   // Camera
   let lookfrom = Point3::new(278.0, 278.0, -800.0);

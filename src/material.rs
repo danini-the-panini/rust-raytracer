@@ -71,7 +71,7 @@ fn reflectance(cosine: f64, ref_idx: f64) -> f64 {
   // Use Schlick's approximation for reflectance.
   let mut r0 = (1.0-ref_idx) / (1.0+ref_idx);
   r0 = r0*r0;
-  r0 + (1.0-r0)*f64::powf(1.0 - cosine, 5.0)
+  r0 + (1.0-r0)*(1.0 - cosine).powf(5.0)
 }
 
 impl Material for Dialectric {
@@ -117,5 +117,27 @@ impl<T: Texture> Material for DiffuseLight<T> {
 
   fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
     self.emit.value(u, v, p)
+  }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct Isotropic<T: Texture> {
+  albedo: T
+}
+
+impl<T: Texture> Isotropic<T> {
+  pub fn new(albedo: T) -> Self { Self { albedo } }
+}
+
+impl Isotropic<SolidColor> {
+  pub fn solid(c: Color) -> Self { Self { albedo: SolidColor::new(c) } }
+}
+
+impl<T: Texture> Material for Isotropic<T> {
+  fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
+      Some((
+        self.albedo.value(rec.u, rec.v, &rec.p),
+        Ray::new(rec.p, Vec3::random_in_unit_sphere(), r_in.time())
+      ))
   }
 }
