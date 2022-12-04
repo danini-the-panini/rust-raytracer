@@ -2,10 +2,11 @@ use std::f64::consts::PI;
 
 use crate::{vec3::{Point3, dot, Vec3}, hittable::{Hittable, HitRecord}, ray::Ray, material::Material, aabb::AABB};
 
+#[derive(Debug, Clone, Copy)]
 pub struct Sphere<M: Material> {
-  pub center: Point3,
-  pub radius: f64,
-  pub material: M,
+  center: Point3,
+  radius: f64,
+  material: M,
 }
 
 pub fn get_sphere_uv(p: &Point3) -> (f64, f64) {
@@ -20,6 +21,10 @@ pub fn get_sphere_uv(p: &Point3) -> (f64, f64) {
   let phi = f64::atan2(-p.z(), p.x()) + PI;
 
   (phi / (2.0*PI), theta / PI)
+}
+
+impl<M: Material> Sphere<M> {
+  pub fn new(center: Point3, radius: f64, material: M) -> Self { Self { center, radius, material } }
 }
 
 impl<M: Material> Hittable for Sphere<M> {

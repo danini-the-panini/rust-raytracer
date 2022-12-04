@@ -1,13 +1,17 @@
 use crate::{vec3::{Point3, dot, Vec3}, hittable::{Hittable, HitRecord}, ray::Ray, material::Material, aabb::AABB, sphere::get_sphere_uv};
 
 pub struct MovingSphere<M: Material> {
-  pub center0: Point3, pub center1: Point3,
-  pub time0: f64, pub time1: f64,
-  pub radius: f64,
-  pub material: M,
+  center0: Point3, pub center1: Point3,
+  time0: f64, pub time1: f64,
+  radius: f64,
+  material: M,
 }
 
 impl<M: Material> MovingSphere<M> {
+  pub fn new(center0: Point3, center1: Point3, time0: f64, time1: f64, radius: f64, material: M) -> Self {
+    Self { center0, center1, time0, time1, radius, material }
+  }
+
   fn center(&self, time: f64) -> Point3 {
     self.center0 + ((time - self.time0) / (self.time1 - self.time0))*(self.center1 - self.center0)
   }

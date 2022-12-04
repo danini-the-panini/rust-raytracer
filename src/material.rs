@@ -1,8 +1,9 @@
 use std::f64;
-use crate::{ray::Ray, hittable::HitRecord, vec3::{Color, Vec3, reflect, unit_vector, dot, refract}, util::{random_double, min}, texture::{Texture, SolidColor}};
+use crate::{ray::Ray, hittable::HitRecord, vec3::{Color, Vec3, reflect, unit_vector, dot, refract, Point3}, util::{random_double, min}, texture::{Texture, SolidColor}};
 
 pub trait Material: Sync {
   fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
+  fn emitted(&self, _u: f64, _v: f64, _p: &Point3) -> Color { Color::zero() }
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -93,5 +94,28 @@ impl Material for Dialectric {
       Color::new(1.0, 1.0, 1.0),
       Ray::new(rec.p, direction, r_in.time())
     ))
+  }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct DiffuseLight<T: Texture> {
+  emit: T
+}
+
+impl<T: Texture> DiffuseLight<T> {
+  pub fn new(a: T) -> Self { Self { emit: a } }
+}
+
+impl DiffuseLight<SolidColor> {
+  pub fn solid(c: Color) -> Self { Self { emit: SolidColor::new(c) } }
+}
+
+impl<T: Texture> Material for DiffuseLight<T> {
+  fn scatter(&self, _r_in: &Ray, _rec: &HitRecord) -> Option<(Color, Ray)> {
+    None
+  }
+
+  fn emitted(&self, u: f64, v: f64, p: &Point3) -> Color {
+    self.emit.value(u, v, p)
   }
 }
