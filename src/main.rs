@@ -3,6 +3,7 @@ mod vec3;
 mod color;
 mod ray;
 mod hittable;
+mod hittable_list;
 mod sphere;
 mod moving_sphere;
 mod camera;
@@ -17,6 +18,8 @@ mod cube;
 use std::f64::INFINITY;
 use aarect::{XYRect, YZRect, XZRect};
 use bvh::BVH;
+use cube::Cube;
+use hittable::{RotateY, Translate};
 use indicatif::ProgressBar;
 use material::DiffuseLight;
 use moving_sphere::MovingSphere;
@@ -172,6 +175,16 @@ fn cornell_box() -> BVH {
   objects.push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 0.0, white)));
   objects.push(Box::new(XZRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
   objects.push(Box::new(XYRect::new(0.0, 555.0, 0.0, 555.0, 555.0, white)));
+
+  let cube1 = Cube::new(Point3::new(0.0, 0.0, 0.0), Point3::new(165.0, 330.0, 165.0), white);
+  let cube1 = RotateY::new(cube1, 15.0);
+  let cube1 = Translate::new(cube1, Vec3::new(265.0, 0.0, 295.0));
+  objects.push(Box::new(cube1));
+
+  let cube2 = Cube::new(Point3::new(0.0, 0.0, 0.0), Point3::new(165.0, 165.0, 165.0), white);
+  let cube2 = RotateY::new(cube2, -18.0);
+  let cube2 = Translate::new(cube2, Vec3::new(130.0, 0.0, 65.0));
+  objects.push(Box::new(cube2));
 
   BVH::new(objects, 0.0, 0.0)
 }

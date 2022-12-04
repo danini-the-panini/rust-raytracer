@@ -14,9 +14,9 @@ pub fn divide_into_parts(n: i32, m: i32) -> Vec<i32> {
   (0..m).map(|i| (n / m as i32) + ((i + 1) <= (n % m as i32)) as i32).collect()
 }
 
-pub fn min(a: f64, b: f64) -> f64 {
+pub fn fmin(a: f64, b: f64) -> f64 {
   if a < b { a } else { b }
 }
-pub fn max(a: f64, b: f64) -> f64 {
+pub fn fmax(a: f64, b: f64) -> f64 {
   if a > b { a } else { b }
 }

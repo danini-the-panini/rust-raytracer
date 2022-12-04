@@ -1,5 +1,5 @@
 use std::f64;
-use crate::{ray::Ray, hittable::HitRecord, vec3::{Color, Vec3, reflect, unit_vector, dot, refract, Point3}, util::{random_double, min}, texture::{Texture, SolidColor}};
+use crate::{ray::Ray, hittable::HitRecord, vec3::{Color, Vec3, reflect, unit_vector, dot, refract, Point3}, util::{random_double, fmin}, texture::{Texture, SolidColor}};
 
 pub trait Material: Sync {
   fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
@@ -79,7 +79,7 @@ impl Material for Dialectric {
     let refraction_ratio = if rec.front_face { 1.0/self.ir } else { self.ir };
 
     let unit_direction = unit_vector(r_in.direction());
-    let cos_theta = min(dot(&-unit_direction, &rec.normal), 1.0);
+    let cos_theta = fmin(dot(&-unit_direction, &rec.normal), 1.0);
     let sin_theta = (1.0 - cos_theta*cos_theta).sqrt();
 
     let cannot_refract = refraction_ratio * sin_theta > 1.0;
