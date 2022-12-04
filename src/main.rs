@@ -18,7 +18,7 @@ use indicatif::ProgressBar;
 use moving_sphere::MovingSphere;
 use rayon::prelude::IntoParallelIterator;
 use rayon::iter::ParallelIterator;
-use texture::{CheckerTexture, NoiseTexture};
+use texture::{CheckerTexture, NoiseTexture, ImageTexture};
 
 use crate::camera::Camera;
 use crate::hittable::Hittable;
@@ -130,6 +130,14 @@ fn two_perlin_spheres() -> BVH {
   BVH::new(world, 0.0, 0.0)
 }
 
+fn earth() -> BVH {
+  let earth_texture = ImageTexture::new("earthmap.jpg");
+  let earth_surface = Lambertian::new(earth_texture);
+  let globe = Box::new(Sphere { center: Point3::zero(), radius: 2.0, material: earth_surface });
+
+  BVH::new(vec![globe], 0.0, 0.0)
+}
+
 fn main() {
   // Image
 
@@ -141,7 +149,7 @@ fn main() {
 
   // World
 
-  let world = two_perlin_spheres();
+  let world = earth();
 
   // Camera
   let lookfrom = Point3::new(12.0, 2.0, 3.0);

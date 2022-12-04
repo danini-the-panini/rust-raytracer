@@ -1,8 +1,6 @@
-use std::iter::repeat;
+use crate::{util::{random_int}, vec3::{Point3, Vec3, dot}};
 
-use crate::{util::{random_int, random_double}, vec3::{Point3, Vec3, dot}};
-
-pub const POINT_COUNT: usize = 256;
+const POINT_COUNT: usize = 256;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Perlin {
