@@ -1,9 +1,25 @@
+use std::f64::consts::PI;
+
 use crate::{vec3::{Point3, dot, Vec3}, hittable::{Hittable, HitRecord}, ray::Ray, material::Material, aabb::AABB};
 
 pub struct Sphere<M: Material> {
   pub center: Point3,
   pub radius: f64,
   pub material: M,
+}
+
+pub fn get_sphere_uv(p: &Point3) -> (f64, f64) {
+  // p: a given point on the sphere of radius one, centered at the origin.
+  // u: returned value [0,1] of angle around the Y axis from X=-1.
+  // v: returned value [0,1] of angle from Y=-1 to Y=+1.
+  //     <1 0 0> yields <0.50 0.50>       <-1  0  0> yields <0.00 0.50>
+  //     <0 1 0> yields <0.50 1.00>       < 0 -1  0> yields <0.50 0.00>
+  //     <0 0 1> yields <0.25 0.50>       < 0  0 -1> yields <0.75 0.50>
+
+  let theta = f64::acos(-p.y());
+  let phi = f64::atan2(-p.z(), p.x()) + PI;
+
+  (phi / (2.0*PI), theta / PI)
 }
 
 impl<M: Material> Hittable for Sphere<M> {
@@ -27,7 +43,8 @@ impl<M: Material> Hittable for Sphere<M> {
     let t = root;
     let p = r.at(t);
     let outward_normal = (p - self.center) / self.radius;
-    let mut rec = HitRecord { t, p, material: &self.material, normal: outward_normal, front_face: true };
+    let (u, v) = get_sphere_uv(&outward_normal);
+    let mut rec = HitRecord { t, p, material: &self.material, normal: outward_normal, front_face: true, u, v };
     rec.set_face_normal(r, &outward_normal);
 
     Some(rec)

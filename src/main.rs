@@ -9,6 +9,7 @@ mod camera;
 mod material;
 mod aabb;
 mod bvh;
+mod texture;
 
 use std::f64::INFINITY;
 use bvh::BVH;
@@ -16,6 +17,7 @@ use indicatif::ProgressBar;
 use moving_sphere::MovingSphere;
 use rayon::prelude::IntoParallelIterator;
 use rayon::iter::ParallelIterator;
+use texture::CheckerTexture;
 
 use crate::camera::Camera;
 use crate::hittable::Hittable;
@@ -63,8 +65,8 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
 fn random_scene() -> BVH {
   let mut world: Vec<Box<dyn Hittable>> = Vec::new();
 
-  let ground_material  = Lambertian { albedo: Color::new(0.5, 0.5, 0.5) };
-  world.push(Box::new(Sphere { center: Point3::new(0.0,-1000.0,0.0), radius: 1000.0, material: ground_material }));
+  let checker = CheckerTexture::solid(Color::new(0.2,0.3,0.1), Color::new(0.9, 0.9, 0.9));
+  world.push(Box::new(Sphere { center: Point3::new(0.0,-1000.0,0.0), radius: 1000.0, material: Lambertian::new(checker) }));
 
   for a in -22..22 {
     for b in -22..22 {
@@ -75,14 +77,14 @@ fn random_scene() -> BVH {
         if choose_mat < 0.8 {
           // diffuse
           let albedo = Color::random() * Color::random();
-          let material = Lambertian { albedo };
+          let material = Lambertian::solid(albedo);
           let center1 = center + Vec3::new(0.0, random_double_in_range(0.0, 0.5), 0.0);
           world.push(Box::new(MovingSphere { center0: center, center1, time0: 0.0, time1: 1.0, radius: 0.2, material }));
         } else if choose_mat < 0.95 {
           // metal
           let albedo = Color::random_in_range(0.5, 1.0);
           let fuzz = random_double_in_range(0.0, 0.5);
-          let material = Metal { albedo, fuzz };
+          let material = Metal::solid(albedo, fuzz);
           world.push(Box::new(Sphere { center, radius: 0.2, material }));
         } else {
           // glass
@@ -96,13 +98,24 @@ fn random_scene() -> BVH {
   let material1 = Dialectric { ir: 1.5 };
   world.push(Box::new(Sphere { center: Point3::new(0.0, 1.0, 0.0), radius: 1.0, material: material1 }));
 
-  let material2 = Lambertian { albedo: Color::new(0.4, 0.2, 0.1) };
+  let material2 = Lambertian::solid(Color::new(0.4, 0.2, 0.1));
   world.push(Box::new(Sphere { center: Point3::new(-4.0, 1.0, 0.0), radius: 1.0, material: material2 }));
 
-  let material3 = Metal { albedo: Color::new(0.7, 0.6, 0.5), fuzz: 0.0 };
+  let material3 = Metal::solid(Color::new(0.7, 0.6, 0.5), 0.0);
   world.push(Box::new(Sphere { center: Point3::new(4.0, 1.0, 0.0), radius: 1.0, material: material3 }));
 
   BVH::new(world, 0.0, 1.0)
+}
+
+fn two_spheres() -> BVH {
+  let mut world: Vec<Box<dyn Hittable>> = Vec::new();
+
+  let checker = CheckerTexture::solid(Color::new(0.2,0.3,0.1), Color::new(0.9, 0.9, 0.9));
+
+  world.push(Box::new(Sphere { center: Point3::new(0.0,-10.0,0.0), radius: 10.0, material: Lambertian::new(checker) }));
+  world.push(Box::new(Sphere { center: Point3::new(0.0,10.0,0.0), radius: 10.0, material: Lambertian::new(checker) }));
+
+  BVH::new(world, 0.0, 0.0)
 }
 
 fn main() {

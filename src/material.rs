@@ -1,41 +1,60 @@
 use std::f64;
-use crate::{ray::Ray, hittable::HitRecord, vec3::{Color, Vec3, reflect, unit_vector, dot, refract}, util::{random_double, min}};
+use crate::{ray::Ray, hittable::HitRecord, vec3::{Color, Vec3, reflect, unit_vector, dot, refract}, util::{random_double, min}, texture::{Texture, SolidColor}};
 
 pub trait Material: Sync {
   fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)>;
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Lambertian {
-  pub albedo: Color
+pub struct Lambertian<T: Texture> {
+  pub albedo: T
 }
 
-impl Material for Lambertian {
+impl<T: Texture> Lambertian<T> {
+  pub fn new(a: T) -> Self { Self { albedo: a } }
+}
+
+impl Lambertian<SolidColor> {
+  pub fn solid(a: Color) -> Self { Self { albedo: SolidColor::new(a) } }
+}
+
+impl<T: Texture> Material for Lambertian<T> {
   fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
-      let mut scatter_direction = rec.normal + Vec3::random_unit_vector();
+    let mut scatter_direction = rec.normal + Vec3::random_unit_vector();
 
-      // Catch degenerate scatter direction
-      if scatter_direction.near_zero() {
-        scatter_direction = rec.normal;
-      }
+    // Catch degenerate scatter direction
+    if scatter_direction.near_zero() {
+      scatter_direction = rec.normal;
+    }
 
-      Some((self.albedo, Ray::new(rec.p, scatter_direction, r_in.time())))
+    Some((
+      self.albedo.value(rec.u, rec.v, &rec.p),
+      Ray::new(rec.p, scatter_direction, r_in.time())
+    ))
   }
 }
 
 #[derive(Debug, Clone, Copy)]
-pub struct Metal {
-  pub albedo: Color,
+pub struct Metal<T: Texture> {
+  pub albedo: T,
   pub fuzz: f64
 }
 
-impl Material for Metal {
+impl<T: Texture> Metal<T> {
+  pub fn new(a: T, fuzz: f64) -> Self { Self { albedo: a, fuzz } }
+}
+
+impl Metal<SolidColor> {
+  pub fn solid(a: Color, fuzz: f64) -> Self { Self { albedo: SolidColor::new(a), fuzz } }
+}
+
+impl<T: Texture> Material for Metal<T> {
   fn scatter(&self, r_in: &Ray, rec: &HitRecord) -> Option<(Color, Ray)> {
       let reflected = reflect(&unit_vector(r_in.direction()), &rec.normal);
       let scattered = Ray::new(rec.p, reflected + self.fuzz*Vec3::random_in_unit_sphere(), r_in.time());
 
       if dot(&scattered.direction(), &rec.normal) > 0.0 {
-        Some((self.albedo, scattered))
+        Some((self.albedo.value(rec.u, rec.v, &rec.p), scattered))
       } else {
         None
       }

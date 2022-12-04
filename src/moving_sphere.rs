@@ -1,4 +1,4 @@
-use crate::{vec3::{Point3, dot, Vec3}, hittable::{Hittable, HitRecord}, ray::Ray, material::Material, aabb::AABB};
+use crate::{vec3::{Point3, dot, Vec3}, hittable::{Hittable, HitRecord}, ray::Ray, material::Material, aabb::AABB, sphere::get_sphere_uv};
 
 pub struct MovingSphere<M: Material> {
   pub center0: Point3, pub center1: Point3,
@@ -35,7 +35,8 @@ impl<M: Material> Hittable for MovingSphere<M> {
     let t = root;
     let p = r.at(t);
     let outward_normal = (p - center) / self.radius;
-    let mut rec = HitRecord { t, p, material: &self.material, normal: outward_normal, front_face: true };
+    let (u, v) = get_sphere_uv(&outward_normal);
+    let mut rec = HitRecord { t, p, material: &self.material, normal: outward_normal, front_face: true, u, v };
     rec.set_face_normal(r, &outward_normal);
 
     Some(rec)
