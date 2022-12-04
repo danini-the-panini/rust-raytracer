@@ -10,6 +10,7 @@ mod material;
 mod aabb;
 mod bvh;
 mod texture;
+mod perlin;
 
 use std::f64::INFINITY;
 use bvh::BVH;
@@ -17,7 +18,7 @@ use indicatif::ProgressBar;
 use moving_sphere::MovingSphere;
 use rayon::prelude::IntoParallelIterator;
 use rayon::iter::ParallelIterator;
-use texture::CheckerTexture;
+use texture::{CheckerTexture, NoiseTexture};
 
 use crate::camera::Camera;
 use crate::hittable::Hittable;
@@ -118,6 +119,17 @@ fn two_spheres() -> BVH {
   BVH::new(world, 0.0, 0.0)
 }
 
+fn two_perlin_spheres() -> BVH {
+  let mut world: Vec<Box<dyn Hittable>> = Vec::new();
+
+  let pertext = NoiseTexture::new(4.0);
+
+  world.push(Box::new(Sphere { center: Point3::new(0.0,-1000.0,0.0), radius: 1000.0, material: Lambertian::new(pertext) }));
+  world.push(Box::new(Sphere { center: Point3::new(0.0,2.0,0.0), radius: 2.0, material: Lambertian::new(pertext) }));
+
+  BVH::new(world, 0.0, 0.0)
+}
+
 fn main() {
   // Image
 
@@ -129,7 +141,7 @@ fn main() {
 
   // World
 
-  let world = random_scene();
+  let world = two_perlin_spheres();
 
   // Camera
   let lookfrom = Point3::new(12.0, 2.0, 3.0);
