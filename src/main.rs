@@ -5,11 +5,13 @@ mod ray;
 mod hittable;
 mod sphere;
 mod moving_sphere;
-mod hittable_list;
 mod camera;
 mod material;
+mod aabb;
+mod bvh;
 
 use std::f64::INFINITY;
+use bvh::BVH;
 use indicatif::ProgressBar;
 use moving_sphere::MovingSphere;
 use rayon::prelude::IntoParallelIterator;
@@ -17,7 +19,6 @@ use rayon::iter::ParallelIterator;
 
 use crate::camera::Camera;
 use crate::hittable::Hittable;
-use crate::hittable_list::HittableList;
 use crate::material::{Lambertian, Metal, Dialectric};
 use crate::sphere::Sphere;
 use crate::util::{random_double, random_double_in_range, divide_into_parts};
@@ -25,7 +26,7 @@ use crate::vec3::{Point3, Color, unit_vector, Vec3};
 use crate::color::write_color;
 use crate::ray::Ray;
 
-fn render_image(cam: &Camera, world: &HittableList, image_width: i32, image_height: i32, samples_per_pixel: i32, max_depth: i32, bar: &ProgressBar) -> Vec<Color> {
+fn render_image(cam: &Camera, world: &dyn Hittable, image_width: i32, image_height: i32, samples_per_pixel: i32, max_depth: i32, bar: &ProgressBar) -> Vec<Color> {
   let mut output : Vec<Color> = Vec::new();
   for j in (0..image_height).rev() {
     for i in 0..image_width {
@@ -59,14 +60,14 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: i32) -> Color {
   (1.0-t)*Color::new(1.0, 1.0, 1.0) + t*Color::new(0.5, 0.7, 1.0)
 }
 
-fn random_scene() -> HittableList {
-  let mut world = HittableList::new();
+fn random_scene() -> BVH {
+  let mut world: Vec<Box<dyn Hittable>> = Vec::new();
 
   let ground_material  = Lambertian { albedo: Color::new(0.5, 0.5, 0.5) };
-  world.add(Box::new(Sphere { center: Point3::new(0.0,-1000.0,0.0), radius: 1000.0, material: ground_material }));
+  world.push(Box::new(Sphere { center: Point3::new(0.0,-1000.0,0.0), radius: 1000.0, material: ground_material }));
 
-  for a in -11..11 {
-    for b in -11..11 {
+  for a in -22..22 {
+    for b in -22..22 {
       let choose_mat = random_double();
       let center = Point3::new(a as f64 + 0.9*random_double(), 0.2, b as f64 + 0.9*random_double());
 
@@ -76,32 +77,32 @@ fn random_scene() -> HittableList {
           let albedo = Color::random() * Color::random();
           let material = Lambertian { albedo };
           let center1 = center + Vec3::new(0.0, random_double_in_range(0.0, 0.5), 0.0);
-          world.add(Box::new(MovingSphere { center0: center, center1, time0: 0.0, time1: 1.0, radius: 0.2, material }));
+          world.push(Box::new(MovingSphere { center0: center, center1, time0: 0.0, time1: 1.0, radius: 0.2, material }));
         } else if choose_mat < 0.95 {
           // metal
           let albedo = Color::random_in_range(0.5, 1.0);
           let fuzz = random_double_in_range(0.0, 0.5);
           let material = Metal { albedo, fuzz };
-          world.add(Box::new(Sphere { center, radius: 0.2, material }));
+          world.push(Box::new(Sphere { center, radius: 0.2, material }));
         } else {
           // glass
           let material = Dialectric { ir: 1.5 };
-          world.add(Box::new(Sphere { center, radius: 0.2, material }));
+          world.push(Box::new(Sphere { center, radius: 0.2, material }));
         }
       }
     }
   }
 
   let material1 = Dialectric { ir: 1.5 };
-  world.add(Box::new(Sphere { center: Point3::new(0.0, 1.0, 0.0), radius: 1.0, material: material1 }));
+  world.push(Box::new(Sphere { center: Point3::new(0.0, 1.0, 0.0), radius: 1.0, material: material1 }));
 
   let material2 = Lambertian { albedo: Color::new(0.4, 0.2, 0.1) };
-  world.add(Box::new(Sphere { center: Point3::new(-4.0, 1.0, 0.0), radius: 1.0, material: material2 }));
+  world.push(Box::new(Sphere { center: Point3::new(-4.0, 1.0, 0.0), radius: 1.0, material: material2 }));
 
   let material3 = Metal { albedo: Color::new(0.7, 0.6, 0.5), fuzz: 0.0 };
-  world.add(Box::new(Sphere { center: Point3::new(4.0, 1.0, 0.0), radius: 1.0, material: material3 }));
+  world.push(Box::new(Sphere { center: Point3::new(4.0, 1.0, 0.0), radius: 1.0, material: material3 }));
 
-  world
+  BVH::new(world, 0.0, 1.0)
 }
 
 fn main() {
@@ -110,7 +111,7 @@ fn main() {
   let aspect_ratio = 16.0 / 9.0;
   let image_width = 400;
   let image_height = (image_width as f64 / aspect_ratio) as i32;
-  let samples_per_pixel = 100;
+  let samples_per_pixel = 50;
   let max_depth = 50;
 
   // World

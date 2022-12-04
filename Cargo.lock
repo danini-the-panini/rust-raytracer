@@ -212,7 +212,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "raytracing-in-one-weekend"
+name = "raytracer"
 version = "0.1.0"
 dependencies = [
  "indicatif",

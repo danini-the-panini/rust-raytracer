@@ -1,6 +1,6 @@
 use std::{ops, fmt};
 
-use crate::util::{random_double, random_double_in_range};
+use crate::util::{random_double, random_double_in_range, min};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3 {
@@ -35,7 +35,7 @@ impl Vec3 {
       if p.length_squared() < 1.0 { break p };
     }
   }
-  
+
   pub fn x(&self) -> f64 { self.e[0] }
   pub fn y(&self) -> f64 { self.e[1] }
   pub fn z(&self) -> f64 { self.e[2] }
@@ -170,9 +170,7 @@ pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
 }
 
 pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {
-  let a = dot(&-*uv, n);
-  let b = 1.0;
-  let cos_theta = if a < b { a } else { b };
+  let cos_theta = min(dot(&-*uv, n), 1.0);
   let r_out_perp =  etai_over_etat * (*uv + cos_theta*(*n));
   let r_out_parallel = -((1.0 - r_out_perp.length_squared()).abs()).sqrt() * (*n);
   r_out_perp + r_out_parallel

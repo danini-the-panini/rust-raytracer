@@ -1,4 +1,4 @@
-use crate::{vec3::{Point3, dot}, hittable::{Hittable, HitRecord}, ray::Ray, material::Material};
+use crate::{vec3::{Point3, dot, Vec3}, hittable::{Hittable, HitRecord}, ray::Ray, material::Material, aabb::AABB};
 
 pub struct MovingSphere<M: Material> {
   pub center0: Point3, pub center1: Point3,
@@ -39,5 +39,18 @@ impl<M: Material> Hittable for MovingSphere<M> {
     rec.set_face_normal(r, &outward_normal);
 
     Some(rec)
+  }
+
+  fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB> {
+    let radius_vec = Vec3::new(self.radius, self.radius, self.radius);
+    let box0 = AABB::new(
+      self.center(time0) - radius_vec,
+      self.center(time0) + radius_vec
+    );
+    let box1 = AABB::new(
+      self.center(time1) - radius_vec,
+      self.center(time1) + radius_vec
+    );
+    Some(AABB::surrounding_box(&box0, &box1))
   }
 }

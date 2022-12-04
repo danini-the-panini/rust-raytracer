@@ -1,4 +1,4 @@
-use crate::{vec3::{Point3, Vec3, dot}, ray::Ray, material::Material};
+use crate::{vec3::{Point3, Vec3, dot}, ray::Ray, material::Material, aabb::AABB};
 
 pub struct HitRecord<'a> {
   pub p: Point3,
@@ -17,4 +17,5 @@ impl HitRecord<'_> {
 
 pub trait Hittable: Sync {
   fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
+  fn bounding_box(&self, time0: f64, time1: f64) -> Option<AABB>;
 }
